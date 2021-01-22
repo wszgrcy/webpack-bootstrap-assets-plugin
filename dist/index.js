@@ -18,15 +18,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BootstrapAssetsPlugin = void 0;
 const path = __importStar(require("path"));
@@ -76,7 +67,7 @@ class BootstrapAssetsPlugin {
         this.options = Object.assign(Object.assign({}, new type_1.BootstrapAssetsPluginOptions()), this.options);
     }
     apply(compiler) {
-        compiler.hooks.shouldEmit.tapPromise('BootstrapAssetsPlugin', (compilation) => __awaiter(this, void 0, void 0, function* () {
+        compiler.hooks.shouldEmit.tap('BootstrapAssetsPlugin', (compilation) => {
             let files = getEmittedFiles(compilation);
             files = this.hooks.originAssets.call(files);
             let bootstrapFiles = filterAndMapBuildFiles(files, ['.css', '.js']);
@@ -121,7 +112,7 @@ class BootstrapAssetsPlugin {
             }
             bootstrapJson = this.hooks.beforeEmit.call(bootstrapJson);
             compilation.assets[this.options.output] = new webpack_sources_1.RawSource(JSON.stringify(bootstrapJson, undefined, 4));
-        }));
+        });
     }
 }
 exports.BootstrapAssetsPlugin = BootstrapAssetsPlugin;

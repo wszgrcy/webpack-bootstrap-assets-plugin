@@ -53,7 +53,7 @@ export class BootstrapAssetsPlugin {
         beforeEmit: new SyncWaterfallHook<{ scripts: AttrGroup[]; stylesheets: AttrGroup[] }>(['bootstrapJson']),
     };
     apply(compiler: webpack.Compiler) {
-        compiler.hooks.shouldEmit.tapPromise('BootstrapAssetsPlugin', async (compilation) => {
+        compiler.hooks.shouldEmit.tap('BootstrapAssetsPlugin', (compilation) => {
             let files = getEmittedFiles(compilation);
             files = this.hooks.originAssets.call(files);
             let bootstrapFiles = filterAndMapBuildFiles(files, ['.css', '.js']);
