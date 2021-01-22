@@ -1,0 +1,30 @@
+{
+  "name": "webpack-bootstrap-assets-plugin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build":"tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wszgrcy/webpack-bootstrap-assets-plugin.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wszgrcy/webpack-bootstrap-assets-plugin/issues"
+  },
+  "homepage": "https://github.com/wszgrcy/webpack-bootstrap-assets-plugin#readme",
+  "devDependencies": {
+    "@types/node": "^14.14.22",
+    "@types/webpack": "^4",
+    "webpack": "^4"
+  },
+  "optionalDependencies": {
+    "@angular-devkit/build-angular": "^0.1002.1",
+    "@angular-devkit/build-webpack": "^0.1002.1"
+  }
+}
