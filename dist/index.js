@@ -28,7 +28,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BootstrapAssetsPlugin = exports.getEmittedFiles = void 0;
+exports.BootstrapAssetsPlugin = void 0;
 const path = __importStar(require("path"));
 const webpack_sources_1 = require("webpack-sources");
 const tapable_1 = require("tapable");
@@ -52,7 +52,6 @@ function getEmittedFiles(compilation) {
     }
     return files.filter(({ file, name }, index) => files.findIndex((f) => f.file === file && (!name || name === f.name)) === index);
 }
-exports.getEmittedFiles = getEmittedFiles;
 function filterAndMapBuildFiles(files, extensionFilter) {
     const filteredFiles = [];
     const validExtensions = Array.isArray(extensionFilter) ? extensionFilter : [extensionFilter];

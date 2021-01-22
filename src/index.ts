@@ -5,7 +5,7 @@ import { SyncWaterfallHook } from 'tapable';
 import { createHash } from 'crypto';
 import { AttrGroup, BootstrapAssetsPluginOptions, EmittedFiles, ExtensionFilter, FileInfo } from './type';
 
-export function getEmittedFiles(compilation: webpack.compilation.Compilation): EmittedFiles[] {
+function getEmittedFiles(compilation: webpack.compilation.Compilation): EmittedFiles[] {
     const files: EmittedFiles[] = [];
 
     for (const chunk of compilation.chunks as Iterable<webpack.compilation.Chunk>) {
