@@ -1,42 +1,30 @@
-import * as webpack from "webpack";
-import * as path from "path";
-import { EmittedFiles, getEmittedFiles } from "@angular-devkit/build-webpack/src/utils";
-import { FileInfo } from "@angular-devkit/build-angular/src/angular-cli-files/utilities/index-file/augment-index-html";
-import { RawSource } from "webpack-sources";
-import { SyncWaterfallHook, AsyncSeriesWaterfallHook } from "tapable";
-type ExtensionFilter = ".js" | ".css";
+import * as webpack from 'webpack';
+import * as path from 'path';
+import { RawSource } from 'webpack-sources';
+import { SyncWaterfallHook } from 'tapable';
+import { createHash } from 'crypto';
+import { AttrGroup, BootstrapAssetsPluginOptions, EmittedFiles, ExtensionFilter, FileInfo } from './type';
 
-export class NgxBootstrapAssetsPlugin {
-    constructor(private options: { output: string } = { output: "bootstrap.json" }) {}
-    hooks = {
-        originAssets: new SyncWaterfallHook(["files"]),
-        beforeAppend: new SyncWaterfallHook(["bootstrapFiles"]),
-        beforeEmit: new SyncWaterfallHook(["bootstrapJson"]),
-    };
-    apply(compiler: webpack.Compiler) {
-        compiler.hooks.shouldEmit.tap("NgxBootstrapAssetsPlugin", (compilation) => {
-            let files = getEmittedFiles(compilation);
-            files = this.hooks.originAssets.call(files);
-            let bootstrapFiles = filterAndMapBuildFiles(files, [".css", ".js"]);
-            bootstrapFiles = this.hooks.beforeAppend.call(bootstrapFiles);
-            let bootstrapJson: { scripts?: { src: string }[]; stylesheets?: { href: string }[] } = {
-                scripts: [],
-                stylesheets: [],
-            };
-            for (const { extension, file, name } of bootstrapFiles) {
-                switch (extension) {
-                    case ".js":
-                        bootstrapJson.scripts.push({ src: file });
-                        break;
-                    case ".css":
-                        bootstrapJson.stylesheets.push({ href: file });
-                        break;
-                }
-            }
-            bootstrapJson = this.hooks.beforeEmit.call(bootstrapJson);
-            compilation.assets[this.options.output] = new RawSource(JSON.stringify(bootstrapJson, undefined, 4));
-        });
+export function getEmittedFiles(compilation: webpack.compilation.Compilation): EmittedFiles[] {
+    const files: EmittedFiles[] = [];
+
+    for (const chunk of compilation.chunks as Iterable<webpack.compilation.Chunk>) {
+        for (const file of chunk.files) {
+            files.push({
+                id: chunk.id!.toString(),
+                name: chunk.name,
+                file,
+                extension: path.extname(file),
+                initial: chunk.isOnlyInitial(),
+            });
+        }
     }
+
+    for (const file of Object.keys(compilation.assets)) {
+        files.push({ file, extension: path.extname(file), initial: false, asset: true });
+    }
+
+    return files.filter(({ file, name }, index) => files.findIndex((f) => f.file === file && (!name || name === f.name)) === index);
 }
 
 function filterAndMapBuildFiles(files: EmittedFiles[], extensionFilter: ExtensionFilter | ExtensionFilter[]): FileInfo[] {
@@ -50,4 +38,63 @@ function filterAndMapBuildFiles(files: EmittedFiles[], extensionFilter: Extensio
     }
 
     return filteredFiles;
+}
+function generateSri(content: string) {
+    const algorithm = 'sha384';
+    return `${algorithm}-${createHash(algorithm).update(content, 'utf8').digest('base64')}`;
+}
+
+export class BootstrapAssetsPlugin {
+    constructor(private options?: BootstrapAssetsPluginOptions) {
+        this.options = { ...new BootstrapAssetsPluginOptions(), ...this.options };
+    }
+    hooks = {
+        originAssets: new SyncWaterfallHook<EmittedFiles[]>(['files']),
+        beforeEmit: new SyncWaterfallHook<{ scripts: AttrGroup[]; stylesheets: AttrGroup[] }>(['bootstrapJson']),
+    };
+    apply(compiler: webpack.Compiler) {
+        compiler.hooks.shouldEmit.tapPromise('BootstrapAssetsPlugin', async (compilation) => {
+            let files = getEmittedFiles(compilation);
+            files = this.hooks.originAssets.call(files);
+            let bootstrapFiles = filterAndMapBuildFiles(files, ['.css', '.js']);
+            let bootstrapJson: { scripts: AttrGroup[]; stylesheets: AttrGroup[] } = {
+                scripts: [],
+                stylesheets: [],
+            };
+            for (const bootstrapFile of bootstrapFiles) {
+                let attrGroup: AttrGroup = {};
+                if (this.options.sri) {
+                    let content = compilation.getAsset(bootstrapFile.file).source.source() as string;
+                    attrGroup.integrity = generateSri(content);
+                }
+                if (this.options.crossOrigin && this.options.crossOrigin !== 'none') {
+                    attrGroup.crossOrigin = this.options.crossOrigin;
+                }
+                switch (bootstrapFile.extension) {
+                    case '.js':
+                        if (this.options.isModuleType && this.options.isNoModuleType) {
+                            if (this.options.isNoModuleType(bootstrapFile) && !this.options.isModuleType(bootstrapFile)) {
+                                attrGroup.nomodule = '';
+                                attrGroup.defer = '';
+                            } else if (this.options.isModuleType(bootstrapFile) && !this.options.isNoModuleType(bootstrapFile)) {
+                                attrGroup.type = 'module';
+                            } else {
+                                attrGroup.defer = '';
+                            }
+                        } else {
+                            attrGroup.defer = '';
+                        }
+                        attrGroup.src = (this.options.deployUrl || '') + bootstrapFile.file;
+                        bootstrapJson.scripts.push(attrGroup);
+                        break;
+                    case '.css':
+                        attrGroup.href = (this.options.deployUrl || '') + bootstrapFile.file;
+                        bootstrapJson.stylesheets.push(attrGroup);
+                        break;
+                }
+            }
+            bootstrapJson = this.hooks.beforeEmit.call(bootstrapJson);
+            compilation.assets[this.options.output] = new RawSource(JSON.stringify(bootstrapJson, undefined, 4));
+        });
+    }
 }

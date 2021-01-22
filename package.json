@@ -1,18 +1,17 @@
 {
   "name": "webpack-bootstrap-assets-plugin",
   "version": "1.0.0",
-  "description": "",
+  "description": "webpack构建时导出启动资源的一个插件",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build":"tsc",
+    "build": "tsc",
     "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wszgrcy/webpack-bootstrap-assets-plugin.git"
   },
-  "author": "",
+  "author": "wszgrcy",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/wszgrcy/webpack-bootstrap-assets-plugin/issues"
@@ -24,7 +23,7 @@
     "webpack": "^4"
   },
   "optionalDependencies": {
-    "@angular-devkit/build-angular": "^0.1002.1",
-    "@angular-devkit/build-webpack": "^0.1002.1"
+    "tapable": ">=1.0.0",
+    "webpack-sources": ">=2.1.0"
   }
 }
