@@ -51,6 +51,7 @@ export class BootstrapAssetsPlugin {
     hooks = {
         originAssets: new SyncWaterfallHook<EmittedFiles[]>(['files']),
         beforeEmit: new SyncWaterfallHook<{ scripts: AttrGroup[]; stylesheets: AttrGroup[] }>(['bootstrapJson']),
+        addAdditionalAttr: new SyncWaterfallHook<AttrGroup, FileInfo>(['AttrGroup', 'FileInfo']),
     };
     apply(compiler: webpack.Compiler) {
         compiler.hooks.shouldEmit.tap('BootstrapAssetsPlugin', (compilation) => {
@@ -85,10 +86,12 @@ export class BootstrapAssetsPlugin {
                             attrGroup.defer = '';
                         }
                         attrGroup.src = (this.options.deployUrl || '') + bootstrapFile.file;
+                        attrGroup = this.hooks.addAdditionalAttr.call(attrGroup, bootstrapFile);
                         bootstrapJson.scripts.push(attrGroup);
                         break;
                     case '.css':
                         attrGroup.href = (this.options.deployUrl || '') + bootstrapFile.file;
+                        attrGroup = this.hooks.addAdditionalAttr.call(attrGroup, bootstrapFile);
                         bootstrapJson.stylesheets.push(attrGroup);
                         break;
                 }
