@@ -29,4 +29,3 @@ export interface AttrGroup {
     src?: string;
     href?: string;
 }
-//# sourceMappingURL=type.d.ts.map

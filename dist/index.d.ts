@@ -13,4 +13,3 @@ export declare class BootstrapAssetsPlugin {
     };
     apply(compiler: webpack.Compiler): void;
 }
-//# sourceMappingURL=index.d.ts.map
