@@ -14,10 +14,10 @@ export interface FileInfo {
 }
 
 export class BootstrapAssetsPluginOptions {
-    crossOrigin: 'none' | 'anonymous' | 'use-credentials';
-    sri: boolean;
-    deployUrl: string = '';
-    output: string = 'bootstrap.json';
+    crossOrigin?: 'none' | 'anonymous' | 'use-credentials';
+    sri?: boolean;
+    deployUrl?: string = '';
+    output?: string = 'bootstrap.json';
 
     isModuleType?: (file: FileInfo) => boolean;
     isNoModuleType?: (file: FileInfo) => boolean;

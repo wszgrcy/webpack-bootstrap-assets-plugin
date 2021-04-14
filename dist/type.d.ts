@@ -13,10 +13,10 @@ export interface FileInfo {
     extension: string;
 }
 export declare class BootstrapAssetsPluginOptions {
-    crossOrigin: 'none' | 'anonymous' | 'use-credentials';
-    sri: boolean;
-    deployUrl: string;
-    output: string;
+    crossOrigin?: 'none' | 'anonymous' | 'use-credentials';
+    sri?: boolean;
+    deployUrl?: string;
+    output?: string;
     isModuleType?: (file: FileInfo) => boolean;
     isNoModuleType?: (file: FileInfo) => boolean;
 }
