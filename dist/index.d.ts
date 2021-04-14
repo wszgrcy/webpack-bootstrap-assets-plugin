@@ -1,6 +1,6 @@
 import * as webpack from 'webpack';
 import { SyncWaterfallHook } from 'tapable';
-import { AttrGroup, BootstrapAssetsPluginOptions, EmittedFiles } from './type';
+import { AttrGroup, BootstrapAssetsPluginOptions, EmittedFiles, FileInfo } from './type';
 export declare class BootstrapAssetsPlugin {
     private options?;
     constructor(options?: BootstrapAssetsPluginOptions);
@@ -10,6 +10,7 @@ export declare class BootstrapAssetsPlugin {
             scripts: AttrGroup[];
             stylesheets: AttrGroup[];
         }, any, any>;
+        addAdditionalAttr: SyncWaterfallHook<AttrGroup, FileInfo, any>;
     };
     apply(compiler: webpack.Compiler): void;
 }

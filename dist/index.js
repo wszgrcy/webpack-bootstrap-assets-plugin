@@ -63,6 +63,7 @@ class BootstrapAssetsPlugin {
         this.hooks = {
             originAssets: new tapable_1.SyncWaterfallHook(['files']),
             beforeEmit: new tapable_1.SyncWaterfallHook(['bootstrapJson']),
+            addAdditionalAttr: new tapable_1.SyncWaterfallHook(['AttrGroup', 'FileInfo']),
         };
         this.options = Object.assign(Object.assign({}, new type_1.BootstrapAssetsPluginOptions()), this.options);
     }
@@ -102,10 +103,12 @@ class BootstrapAssetsPlugin {
                             attrGroup.defer = '';
                         }
                         attrGroup.src = (this.options.deployUrl || '') + bootstrapFile.file;
+                        attrGroup = this.hooks.addAdditionalAttr.call(attrGroup, bootstrapFile);
                         bootstrapJson.scripts.push(attrGroup);
                         break;
                     case '.css':
                         attrGroup.href = (this.options.deployUrl || '') + bootstrapFile.file;
+                        attrGroup = this.hooks.addAdditionalAttr.call(attrGroup, bootstrapFile);
                         bootstrapJson.stylesheets.push(attrGroup);
                         break;
                 }

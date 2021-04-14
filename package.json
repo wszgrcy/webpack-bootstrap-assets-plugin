@@ -1,6 +1,6 @@
 {
   "name": "webpack-bootstrap-assets-plugin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "webpack构建时导出启动资源的一个插件",
   "main": "dist/index.js",
   "scripts": {
