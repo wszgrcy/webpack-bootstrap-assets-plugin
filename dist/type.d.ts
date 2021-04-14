@@ -28,4 +28,6 @@ export interface AttrGroup {
     type?: string;
     src?: string;
     href?: string;
+    name: string;
+    fileName?: string;
 }

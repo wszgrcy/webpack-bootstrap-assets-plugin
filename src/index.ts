@@ -63,7 +63,7 @@ export class BootstrapAssetsPlugin {
                 stylesheets: [],
             };
             for (const bootstrapFile of bootstrapFiles) {
-                let attrGroup: AttrGroup = {};
+                let attrGroup: AttrGroup = { name: bootstrapFile.name || '', fileName: bootstrapFile.file };
                 if (this.options.sri) {
                     let content = compilation.getAsset(bootstrapFile.file).source.source() as string;
                     attrGroup.integrity = generateSri(content);
