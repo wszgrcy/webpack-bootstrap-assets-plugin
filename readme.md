@@ -21,6 +21,11 @@
 - 同步瀑布钩子
 - 生成的对象,即将成为资源
 
+### extraAssets
+
+- 同步瀑布钩子
+- 返回的对象为生成的资源,允许自定义多种(默认只有 json),比如 jsonp,html 等
+
 ## options
 
 - crossOrigin 是否跨域

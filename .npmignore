@@ -1,0 +1,9 @@
+/src
+test
+tsconfig*
+.prettierrc
+.gitignore
+coverage
+.github
+docs
+.vscode

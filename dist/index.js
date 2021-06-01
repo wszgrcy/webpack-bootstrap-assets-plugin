@@ -64,6 +64,7 @@ class BootstrapAssetsPlugin {
             originAssets: new tapable_1.SyncWaterfallHook(['files']),
             beforeEmit: new tapable_1.SyncWaterfallHook(['bootstrapJson']),
             addAdditionalAttr: new tapable_1.SyncWaterfallHook(['AttrGroup', 'FileInfo']),
+            extraAssets: new tapable_1.SyncWaterfallHook(['']),
         };
         this.options = Object.assign(Object.assign({}, new type_1.BootstrapAssetsPluginOptions()), this.options);
     }
@@ -114,7 +115,15 @@ class BootstrapAssetsPlugin {
                 }
             }
             bootstrapJson = this.hooks.beforeEmit.call(bootstrapJson);
-            compilation.assets[this.options.output] = new webpack_sources_1.RawSource(JSON.stringify(bootstrapJson, undefined, 4));
+            let extraAssetObject = {};
+            extraAssetObject[this.options.output] = new webpack_sources_1.RawSource(JSON.stringify(bootstrapJson, undefined, 4));
+            extraAssetObject = this.hooks.extraAssets.call(extraAssetObject, bootstrapJson);
+            for (const key in extraAssetObject) {
+                if (Object.prototype.hasOwnProperty.call(extraAssetObject, key)) {
+                    const value = extraAssetObject[key];
+                    compilation.assets[key] = new webpack_sources_1.RawSource(value);
+                }
+            }
         });
     }
 }

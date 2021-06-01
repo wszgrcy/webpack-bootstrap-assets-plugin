@@ -11,6 +11,10 @@ export declare class BootstrapAssetsPlugin {
             stylesheets: AttrGroup[];
         }, any, any>;
         addAdditionalAttr: SyncWaterfallHook<AttrGroup, FileInfo, any>;
+        extraAssets: SyncWaterfallHook<Record<string, string>, {
+            scripts: AttrGroup[];
+            stylesheets: AttrGroup[];
+        }, any>;
     };
     apply(compiler: webpack.Compiler): void;
 }
