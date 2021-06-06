@@ -1,6 +1,6 @@
 {
   "name": "webpack-bootstrap-assets-plugin",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "webpack构建时导出启动资源的一个插件",
   "main": "dist/index.js",
   "scripts": {
@@ -21,11 +21,11 @@
     "@types/node": "^14.14.22",
     "@types/webpack": "^4",
     "webpack": "^4",
-    "webpack-sources": ">=2.1.0",
-    "tapable": ">=1.0.0"
+    "webpack-sources": "^2.1.0",
+    "tapable": "^1.0.0"
   },
   "peerDependencies": {
-    "tapable": ">=1.0.0",
-    "webpack-sources": ">=2.1.0"
+    "tapable": "^1.0.0",
+    "webpack-sources": "^2.1.0"
   }
 }

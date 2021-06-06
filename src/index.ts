@@ -99,7 +99,7 @@ export class BootstrapAssetsPlugin {
             }
             bootstrapJson = this.hooks.beforeEmit.call(bootstrapJson);
             let extraAssetObject = {};
-            extraAssetObject[this.options.output] = new RawSource(JSON.stringify(bootstrapJson, undefined, 4));
+            extraAssetObject[this.options.output] = JSON.stringify(bootstrapJson, undefined, 4);
             extraAssetObject = this.hooks.extraAssets.call(extraAssetObject, bootstrapJson);
             for (const key in extraAssetObject) {
                 if (Object.prototype.hasOwnProperty.call(extraAssetObject, key)) {
