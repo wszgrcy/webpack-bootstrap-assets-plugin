@@ -27,9 +27,9 @@ export class BootstrapAssetsPlugin {
         this.options = { ...new BootstrapAssetsPluginOptions(), ...this.options };
     }
     hooks = {
-        removeChunk: new SyncBailHook<webpack.Chunk, boolean>(['webpack.Chunk']),
+        removeChunk: new SyncBailHook<webpack.Chunk, boolean>(['webpackChunk']),
         removeChunkFile: new SyncBailHook<string, boolean>(['fileName']),
-        removeAsset: new SyncBailHook<string, boolean>(['assetsName']),
+        removeAsset: new SyncBailHook<string, boolean>(['assetName']),
         emittedFiles: new SyncWaterfallHook<EmittedFiles[][]>(['files']),
         beforeEmit: new SyncWaterfallHook<{ scripts: AttrGroup[]; stylesheets: AttrGroup[] }>(['bootstrapJson']),
         addAdditionalAttr: new SyncWaterfallHook<[AttrGroup, FileInfo]>(['AttrGroup', 'FileInfo']),
