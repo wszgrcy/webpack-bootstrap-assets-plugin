@@ -1,31 +1,9 @@
 import * as webpack from 'webpack';
 import * as path from 'path';
 import { RawSource } from 'webpack-sources';
-import { SyncWaterfallHook } from 'tapable';
+import { SyncBailHook, SyncWaterfallHook } from 'tapable';
 import { createHash } from 'crypto';
 import { AttrGroup, BootstrapAssetsPluginOptions, EmittedFiles, ExtensionFilter, FileInfo } from './type';
-
-function getEmittedFiles(compilation: webpack.Compilation): EmittedFiles[] {
-    const files: EmittedFiles[] = [];
-
-    for (const chunk of compilation.chunks) {
-        for (const file of chunk.files) {
-            files.push({
-                id: chunk.id!.toString(),
-                name: chunk.name,
-                file,
-                extension: path.extname(file),
-                initial: chunk.isOnlyInitial(),
-            });
-        }
-    }
-
-    for (const file of Object.keys(compilation.assets)) {
-        files.push({ file, extension: path.extname(file), initial: false, asset: true });
-    }
-
-    return files.filter(({ file, name }, index) => files.findIndex((f) => f.file === file && (!name || name === f.name)) === index);
-}
 
 function filterAndMapBuildFiles(files: EmittedFiles[], extensionFilter: ExtensionFilter | ExtensionFilter[]): FileInfo[] {
     const filteredFiles: FileInfo[] = [];
@@ -49,7 +27,10 @@ export class BootstrapAssetsPlugin {
         this.options = { ...new BootstrapAssetsPluginOptions(), ...this.options };
     }
     hooks = {
-        originAssets: new SyncWaterfallHook<EmittedFiles[][]>(['files']),
+        canAddChunk: new SyncBailHook<webpack.Chunk, boolean>(),
+        canAddChunkFile: new SyncBailHook<string, boolean>(),
+        canAddAsset: new SyncBailHook<string, boolean>(),
+        emittedFiles: new SyncWaterfallHook<EmittedFiles[][]>(['files']),
         beforeEmit: new SyncWaterfallHook<{ scripts: AttrGroup[]; stylesheets: AttrGroup[] }>(['bootstrapJson']),
         addAdditionalAttr: new SyncWaterfallHook<[AttrGroup, FileInfo]>(['AttrGroup', 'FileInfo']),
         extraAssets: new SyncWaterfallHook<[Record<string, string>, { scripts: AttrGroup[]; stylesheets: AttrGroup[] }]>(['arg1', 'arg2']),
@@ -57,8 +38,8 @@ export class BootstrapAssetsPlugin {
     apply(compiler: webpack.Compiler) {
         compiler.hooks.thisCompilation.tap('BootstrapAssetsPlugin', (compilation) => {
             compilation.hooks.processAssets.tap('BootstrapAssetsPlugin', (assets) => {
-                let files = getEmittedFiles(compilation);
-                files = this.hooks.originAssets.call(files);
+                let files = this.getEmittedFiles(compilation);
+                files = this.hooks.emittedFiles.call(files);
                 let bootstrapFiles = filterAndMapBuildFiles(files, ['.css', '.js']);
                 let bootstrapJson: { scripts: AttrGroup[]; stylesheets: AttrGroup[] } = {
                     scripts: [],
@@ -110,5 +91,35 @@ export class BootstrapAssetsPlugin {
                 }
             });
         });
+    }
+    private getEmittedFiles(compilation: webpack.Compilation): EmittedFiles[] {
+        const files: EmittedFiles[] = [];
+
+        for (const chunk of compilation.chunks) {
+            if (!this.hooks.canAddChunk.call(chunk)) {
+                continue;
+            }
+            for (const file of chunk.files) {
+                if (!this.hooks.canAddChunkFile.call(file)) {
+                    continue;
+                }
+                files.push({
+                    id: chunk.id!.toString(),
+                    name: chunk.name,
+                    file,
+                    extension: path.extname(file),
+                    initial: chunk.isOnlyInitial(),
+                });
+            }
+        }
+
+        for (const file of Object.keys(compilation.assets)) {
+            if (!this.hooks.canAddAsset.call(file)) {
+                continue;
+            }
+            files.push({ file, extension: path.extname(file), initial: false, asset: true });
+        }
+
+        return files.filter(({ file, name }, index) => files.findIndex((f) => f.file === file && (!name || name === f.name)) === index);
     }
 }
