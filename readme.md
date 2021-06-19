@@ -10,8 +10,15 @@
 # 功能
 
 ## hook
+### removeChunk
+- 判断chunk是否可以添加 (true移除)
 
-### originAssets
+### removeChunkFile
+- 判断chunk file的文件是否可以添加
+
+### removeAsset
+- 判断资源文件是否可以添加
+### emittedFiles(originAssets已重命名)
 
 - 同步瀑布钩子
 - 用于添加原始资源
@@ -19,9 +26,9 @@
 ### beforeEmit
 
 - 同步瀑布钩子
-- 生成的对象,即将成为资源
+- 生成的对象,即将成为默认资源
 
-### extraAssets
+### emitAssets(extraAssets已重命名)
 
 - 同步瀑布钩子
 - 返回的对象为生成的资源,允许自定义多种(默认只有 json),比如 jsonp,html 等

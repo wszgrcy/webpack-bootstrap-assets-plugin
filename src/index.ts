@@ -27,13 +27,13 @@ export class BootstrapAssetsPlugin {
         this.options = { ...new BootstrapAssetsPluginOptions(), ...this.options };
     }
     hooks = {
-        canAddChunk: new SyncBailHook<webpack.Chunk, boolean>(),
-        canAddChunkFile: new SyncBailHook<string, boolean>(),
-        canAddAsset: new SyncBailHook<string, boolean>(),
+        removeChunk: new SyncBailHook<webpack.Chunk, boolean>(['webpack.Chunk']),
+        removeChunkFile: new SyncBailHook<string, boolean>(['fileName']),
+        removeAsset: new SyncBailHook<string, boolean>(['assetsName']),
         emittedFiles: new SyncWaterfallHook<EmittedFiles[][]>(['files']),
         beforeEmit: new SyncWaterfallHook<{ scripts: AttrGroup[]; stylesheets: AttrGroup[] }>(['bootstrapJson']),
         addAdditionalAttr: new SyncWaterfallHook<[AttrGroup, FileInfo]>(['AttrGroup', 'FileInfo']),
-        extraAssets: new SyncWaterfallHook<[Record<string, string>, { scripts: AttrGroup[]; stylesheets: AttrGroup[] }]>(['arg1', 'arg2']),
+        emitAssets: new SyncWaterfallHook<[Record<string, string>, { scripts: AttrGroup[]; stylesheets: AttrGroup[] }]>(['arg1', 'arg2']),
     };
     apply(compiler: webpack.Compiler) {
         compiler.hooks.thisCompilation.tap('BootstrapAssetsPlugin', (compilation) => {
@@ -82,7 +82,7 @@ export class BootstrapAssetsPlugin {
                 bootstrapJson = this.hooks.beforeEmit.call(bootstrapJson);
                 let extraAssetObject = {};
                 extraAssetObject[this.options.output] = JSON.stringify(bootstrapJson, undefined, 4);
-                extraAssetObject = this.hooks.extraAssets.call(extraAssetObject, bootstrapJson);
+                extraAssetObject = this.hooks.emitAssets.call(extraAssetObject, bootstrapJson);
                 for (const key in extraAssetObject) {
                     if (Object.prototype.hasOwnProperty.call(extraAssetObject, key)) {
                         const value = extraAssetObject[key];
@@ -96,11 +96,11 @@ export class BootstrapAssetsPlugin {
         const files: EmittedFiles[] = [];
 
         for (const chunk of compilation.chunks) {
-            if (!this.hooks.canAddChunk.call(chunk)) {
+            if (this.hooks.removeChunk.call(chunk)) {
                 continue;
             }
             for (const file of chunk.files) {
-                if (!this.hooks.canAddChunkFile.call(file)) {
+                if (this.hooks.removeChunkFile.call(file)) {
                     continue;
                 }
                 files.push({
@@ -114,7 +114,7 @@ export class BootstrapAssetsPlugin {
         }
 
         for (const file of Object.keys(compilation.assets)) {
-            if (!this.hooks.canAddAsset.call(file)) {
+            if (this.hooks.removeAsset.call(file)) {
                 continue;
             }
             files.push({ file, extension: path.extname(file), initial: false, asset: true });
